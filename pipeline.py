@@ -26,21 +26,57 @@ DATABASE_CONFIG = {
 
 # Load model dan scalers
 try:
-    model = load_model('model.h5')
+    model_pemasukan = load_model('model.h5')
+    model_pengeluaran = load_model('model2.h5')
     
     # Load scalers untuk pemasukan dan pengeluaran
     scaler_x = joblib.load('scaler_x.pkl')  # Scaler untuk input features
     scaler_y = joblib.load('scaler_y.pkl')  # Scaler untuk output pemasukan
     scaler_x_pengeluaran = joblib.load('scaler_x_pengeluaran.pkl')  # Scaler input pengeluaran
     scaler_y_pengeluaran = joblib.load('scaler_y_pengeluaran.pkl')  # Scaler output pengeluaran
-    
-    print("Model dan scalers berhasil dimuat")
-    print(f"Model input shape: {model.input_shape}")
-    print(f"Model output shape: {model.output_shape}")
+        
+    print("Models dan scalers berhasil dimuat")
+    print(f"Model pemasukan input shape: {model_pemasukan.input_shape}")
+    print(f"Model pemasukan output shape: {model_pemasukan.output_shape}")
+    print(f"Model pengeluaran input shape: {model_pengeluaran.input_shape}")
+    print(f"Model pengeluaran output shape: {model_pengeluaran.output_shape}")
     
 except Exception as e:
     print(f"Error loading model/scalers: {e}")
-    model = None
+    model_pemasukan = None
+    model_pengeluaran = None
+
+# Membuat koneksi ke database berdasarkan konfigurasi
+def get_database_connection():
+    if DATABASE_CONFIG['type'] == 'sqlite':
+        return sqlite3.connect(DATABASE_CONFIG['sqlite_path'])
+    elif DATABASE_CONFIG['type'] == 'mysql':
+        config = DATABASE_CONFIG['mysql']
+        return mysql.connector.connect(
+            host=config['host'],
+            user=config['user'],
+            password=config['password'],
+            database=config['database']
+        )
+
+# Mengambil data dari database SQL
+def get_data_from_sql(query, params=None):
+    try:
+        if DATABASE_CONFIG['type'] == 'sqlite':
+            conn = sqlite3.connect(DATABASE_CONFIG['sqlite_path'])
+            df = pd.read_sql_query(query, conn, params=params)
+            conn.close()
+        else:
+            # Untuk MySQL/PostgreSQL menggunakan SQLAlchemy
+            if DATABASE_CONFIG['type'] == 'mysql':
+                config = DATABASE_CONFIG['mysql']
+                engine = create_engine(f"mysql+pymysql://{config['user']}:{config['password']}@{config['host']}/{config['database']}")
+                df = pd.read_sql_query(query, engine, params=params)
+        
+        return df
+    except Exception as e:
+        print(f"Error mengambil data dari SQL: {e}")
+        return None
 
 @app.route('/predict/pemasukan', methods=['POST'])
 def predict_pemasukan():
@@ -129,4 +165,4 @@ def predict_pengeluaran():
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
 
-# ga yakin si ....
+# blm selesai, baru ambil dari sql
