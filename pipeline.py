@@ -6,8 +6,23 @@ import joblib
 import os
 from datetime import datetime, timedelta
 import json
+import sqlite3
+import mysql.connector
+from sqlalchemy import create_engine
 
 app = Flask(__name__)
+
+# Konfigurasi database
+DATABASE_CONFIG = {
+    'type': 'sqlite',  # 'sqlite', 'mysql', 'postgresql'
+    'sqlite_path': 'data.db',
+    'mysql': {
+        'host': 'localhost',
+        'user': 'root',
+        'password': 'password',
+        'database': 'business_db'
+    }
+}
 
 # Load model dan scalers
 try:
