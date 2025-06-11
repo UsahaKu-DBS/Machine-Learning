@@ -1,0 +1,9 @@
+Flask
+Flask-SQLAlchemy
+pandas
+numpy
+tensorflow
+scikit-learn
+joblib
+PyMySQL
+python-dotenv
