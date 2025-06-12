@@ -1,0 +1,7 @@
+# Setup untuk Python
+[phases.setup]
+nixPkgs = ["python3"]
+
+# Setup run
+[phases.start]
+cmd = "gunicorn app:app"
