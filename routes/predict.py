@@ -8,8 +8,7 @@ prediksi_bp = Blueprint('prediksi_bp', __name__)
 
 # Pemuatan Model
 try:
-    model_pemasukan = load_model('model.h5')
-    model_pengeluaran = load_model('model2.h5')
+    model = load_model('model.h5')
     scaler_x = joblib.load('scaler_x.pkl')
     scaler_y = joblib.load('scaler_y.pkl')
     scaler_x_pengeluaran = joblib.load('scaler_x_pengeluaran.pkl')
@@ -17,7 +16,7 @@ try:
     print("Models dan scalers untuk prediksi berhasil dimuat.")
 except Exception as e:
     print(f"Peringatan: Error saat memuat model/scaler, endpoint prediksi tidak akan berfungsi. Error: {e}")
-    model_pemasukan, model_pengeluaran = None, None
+    model = None
 
 # Fungsi Helper Internal untuk Menghindari Duplikasi Kode
 def _run_prediction(data, model, scaler_x_instance, scaler_y_instance):
@@ -55,11 +54,11 @@ def _run_prediction(data, model, scaler_x_instance, scaler_y_instance):
 # Endpoint Prediksi
 @prediksi_bp.route('/predict/pemasukan', methods=['POST'])
 def predict_pemasukan():
-    if model_pemasukan is None:
+    if model is None:
         return jsonify({'error': 'Model Pemasukan tidak tersedia di server.'}), 503
     try:
         result, status_code = _run_prediction(
-            request.get_json(), model_pemasukan, scaler_x, scaler_y
+            request.get_json(), model, scaler_x, scaler_y
         )
         return jsonify(result), status_code
     except Exception as e:
@@ -68,11 +67,11 @@ def predict_pemasukan():
 
 @prediksi_bp.route('/predict/pengeluaran', methods=['POST'])
 def predict_pengeluaran():
-    if model_pengeluaran is None:
+    if model is None:
         return jsonify({'error': 'Model Pengeluaran tidak tersedia di server.'}), 503
     try:
         result, status_code = _run_prediction(
-            request.get_json(), model_pengeluaran, scaler_x_pengeluaran, scaler_y_pengeluaran
+            request.get_json(), model, scaler_x_pengeluaran, scaler_y_pengeluaran
         )
         return jsonify(result), status_code
     except Exception as e:
