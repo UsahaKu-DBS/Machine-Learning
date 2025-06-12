@@ -4,4 +4,4 @@ nixPkgs = ["python3"]
 
 # Setup run
 [phases.start]
-cmd = "gunicorn app:app"
+cmd = "gunicorn pipeline:app"
